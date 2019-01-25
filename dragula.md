@@ -151,7 +151,140 @@ var drake = dragula({
 ### options.copy
 
 
+如果copy属性设为true（或返回值为true的方法），那么元素将被复制到拖放区，而不是移动到拖放区。这意味着以下的不同:
 
 
+Event(事件) | Move(移动) | Copy（复制）
+-----------| ------------|-----------
+drag | 元素在源容器会被虚化 | 无事发生
+drop | 元素被移动到目标位置 | 元素被克隆到目标位置
+remove | 元素从DOM中删除 | 无事发生
+cacel | 元素留在原容器中 | 无事发生
+
+如果传递了一个方法，那么每当开始拖动一个元素时，就会调用它，以决定是否应该遵循复制行为。考虑如下例子：
+
+```js
+copy: function(el, source) {
+  return el.className === 'you-may-copy-us';
+}
+```
+
+### options.copySortSource
+
+如果copy被设置为true(或返回true的方法)，并且copySortSource也为true，那么用户将能够对复制源容器中的元素进行排序。
+
+```js
+copy: true,
+copySortSource: true
+```
+
+### options.revertOnSpill
+
+默认情况下，将元素溢出到任何容器外都会将该元素移回由反馈阴影预览的下拉位置。将revertonoverflow设置为true将确保丢弃在任何已批准的容器之外的元素被移动回拖放事件开始的源元素，而不是停留在反馈阴影预览的拖放位置。
+
+### options.removeOnSpill
+
+默认情况下，将元素溢出到任何容器外都会将该元素移回由反馈阴影预览的下拉位置。将removeon溢出设置为true将确保从DOM中删除任何已批准容器之外的元素。注意，如果将copy设置为true，则remove事件不会触发。
+
+### options.direction
+
+当一个元素被放入容器中时，它将被放置在鼠标被释放的位置附近。如果方向是“垂直”(默认值)，则考虑Y轴。否则，如果方向为“水平”，则考虑X轴。
+
+### options.invalid
+
+你可以提供invalid(el, handle)方法。当不能触发drag事件的元素被拖动时这个方法会返回true值。句柄参数是单击的元素，而el是要拖动的项。
+下面例子，默认不能阻止任何drag事件。
+
+```js
+function invalidTarget(el, handle) {
+  return false;
+}
+```
+
+注意，invalid方法会在单击的DOM元素和drake容器的所有父元素(直到直接子元素)上调用。
+
+例如，当单击的元素(或其任何父元素)是锚标记时，可以将invalid设置为返回false。
+
+```js
+invalid: function(el, handle) {
+  return el.tagName === 'A';
+}
+```
+
+### options.mirrorContainer
+
+拖动时显示镜像元素的DOM元素将被追加到其中。默认为document.body。
+
+### options.ignoreInputTextSelection
+
+启用此选项时，如果用户单击输入元素，则在其鼠标指针退出输入之前不会启动拖动。这意味着用户可以选择包含在可拖动元素中的输入中的文本，并且仍然可以通过将鼠标移到输入之外来拖动元素——这样您就可以同时获得这两个方面的好处。
+
+默认情况下启用此选项。通过设置为false来关闭它。如果它被禁用，用户将无法使用鼠标在dragula容器中的输入中选择文本。
+
+## API
+
+dragula方法返回一个带有简洁API的小对象。我们将把dragula返回的API称为drake。
+
+### drake.containers
+
+此属性包含在构建此drake实例时传递给dragula的容器集合。您可以随意推动更多的容器和拼接旧容器。
+
+### drake.dragging
+
+当拖拽元素时，dragging属性为true.
+
+### drake.start(item)
+
+进入没有阴影的拖动模式。当为现有的拖放解决方案提供键盘快捷键时，此方法非常有用。即使一开始不会创建一个阴影，用户只要单击item并开始拖动它，
+就会得到一个阴影。注意，如果他们单击并拖动其他东西，.end将在获取新项目之前被调用。
+
+### drake.end()
+
+优雅地结束拖动事件，就像使用由预览阴影标记的最后一个位置作为拖放目标一样。正确的取消或删除事件将被触发，这取决于项目是否被删除回它最初被提取
+的位置(这本质上是一个被视为取消事件的no-op)。
+
+### drake.cancel(revert)
+
+如果drake管理的元素当前正在被拖动，该方法将优雅地取消拖动操作。您还可以在方法调用级别传递restore，有效地生成与revertonoverflow相同的结果。
+
+### drake.remove()
+
+### drake.on(Events)
+
+drake是事件触发器。下面使用drake.on(type, listener)可以跟踪到下面的事件。
+
+
+事件名称 | 事件参数 | 事件说明
+--- | --- | ---
+drag | el, source | el是从source提出来的
+dragend | el | el的拖拽事件被cancel、remove或drop触发
+drop | el, target, source, sibling | el被放在兄弟元素之前的目标位置
+cancel | el, container, source | 拖拽el到外部地方时会放回原位置
+remove | el, container, source | 拖拽el但没放置时将从DOM中删除
+shadow | el, container, source | 
+over | el, container, source | el在container中
+out | el, container, source | 拖拽el到container以外的地方
+cloned | clone, container, type | 
+
+### drake.canMove(item)
+
+返回drake实例是否可以接受DOM元素项的拖动。当满足以下所有条件时，此方法返回true，否则返回false。
+
+- item是drake指定容器之一的子元素
+- item 通过相关的invalid检查
+- item通过一个moves检查
+
+### drake.destroy()
+
+删除dragula用于管理容器之间的拖放操作的所有拖放事件。如果在拖动元素时调用.destroy，则该拖动将被有效地取消。
+
+## CSS 
+
+Dragula只使用四个CSS类。下面将快速解释它们的用途，但是您可以查看dist/dragula。查看相应的css规则。
+
+- 拖动时将gu-unselectable添加到mirrorContainer元素中。您可以在拖动某个对象时使用它来样式化mirrorContainer。
+- 当拖动源元素的镜像时，将向其添加gu-transit。它只是增加了不透明度。
+- 将gu-mirror添加到镜像中。它处理固定的定位和z索引(并删除元素上的任何先前空白)。请注意，镜像被附加到mirrorContainer，而不是它的初始容器。在使用嵌套规则对元素进行样式化时，请记住这一点，例如.list .item {padding: 10px;}。
+- gui-hide是一个辅助类，设置元素display:none
 
 
