@@ -60,7 +60,7 @@ Dragula为您的应用程序提供了最简单的API。
 ## dragula(containers?, options?)
 
 默认情况下，dragula允许用户在任何容器中拖动一个元素，并将其放到列表中的任何其他容器中。如果元素被放置到容器之外的任何地方，
-那么根据==revertonoverflow==和removeonoverflow选项，事件将被优雅地取消。
+那么根据=revertonoverflow=和=removeonoverflow=选项，事件将被优雅地取消。
 
 注意，拖动只在单击鼠标左键时触发，而且只有在没有按下元键时才触发。
 
