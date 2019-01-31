@@ -78,7 +78,7 @@ dragula(containers, {
     return false; // 只有drake.containers中的元素才考虑
   },
   moves: function(el, source, handle, sibling) {
-    return false; // 默认情况下，元素总是可拖拽的
+    return true; // 默认情况下，元素总是可拖拽的
   }，
   accepts: function(el, target, source, sibling) {
     return true; // 默认情况下，元素可被放置在任何`containers`中
