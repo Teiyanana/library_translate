@@ -40,9 +40,9 @@ bower install dragula --save
 
 **引用js**
 
-这儿有一个警告。不能在你web应用的<head>中引入js文件。在<head>放置js引用是非常不好的习惯，dragula也不支持这样使用。
+这儿有一个警告。不能在你web应用的\<head>中引入js文件。在\<head>放置js引用是非常不好的习惯，dragula也不支持这样使用。
 
-请把dragula引用放在<body>标签中。
+请把dragula引用放在\<body>标签中。
 
 **引用CSS**
 
